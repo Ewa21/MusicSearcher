@@ -1,10 +1,12 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import sample.model.Datasource;
 
 public class Main extends Application {
 
@@ -16,6 +18,22 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    @Override
+    public void init() throws Exception {
+
+        if(!Datasource.getInstance().open()){
+            System.out.println("FATAL ERROR: Couldn't connect to the database.");
+            Platform.exit();
+        }
+        super.init();
+    }
+
+    @Override
+    public void stop() throws Exception
+    {
+        Datasource.getInstance().close();
+        super.stop();
+    }
 
     public static void main(String[] args) {
 
