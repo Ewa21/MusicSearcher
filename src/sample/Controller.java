@@ -19,23 +19,24 @@ public class Controller {
 
     @FXML
     private ProgressBar progressBar;
+
     @FXML
-    public void listArtists(){
+    public void listArtists() {
         Task<ObservableList<Artist>> task = new GetAllArtistsTask();
         artistTable.itemsProperty().bind(task.valueProperty());
 
         progressBar.progressProperty().bind(task.progressProperty());
         progressBar.setVisible(true);
-        task.setOnSucceeded(e->progressBar.setVisible(false));
-        task.setOnFailed(e->progressBar.setVisible(false));
+        task.setOnSucceeded(e -> progressBar.setVisible(false));
+        task.setOnFailed(e -> progressBar.setVisible(false));
         new Thread(task).start();
     }
 
     @FXML
-    public void listAlbumsForArtist(){
+    public void listAlbumsForArtist() {
         final Artist artist = (Artist) artistTable.getSelectionModel().getSelectedItem();
 
-        if(artist==null){
+        if (artist == null) {
             System.out.println("No artist selected.");
             return;
         }
@@ -45,14 +46,37 @@ public class Controller {
             protected ObservableList<Album> call() throws Exception {
                 return FXCollections.observableArrayList(
                         Datasource.getInstance().queryAlbumsForArtistId(artist.getId()));
-                           }
+            }
         };
         artistTable.itemsProperty().bind(task.valueProperty());
         new Thread(task).start();
     }
+
+    @FXML
+    public void updateAtrist() {
+        final Artist artist = (Artist) artistTable.getItems().get(2);
+
+        Task<Boolean> task = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+
+                // updating the 3. record in the view table
+                return Datasource.getInstance().updateArtistName(artist.getId(), "AC/DC");
+            }
+        };
+
+        //updating the table view
+        task.setOnSucceeded( e->{
+            if(task.valueProperty().get()){
+                artist.setName("AC/DC");
+                artistTable.refresh();
+
+            }
+        });
+
+        new Thread(task).start();
+    }
 }
-
-
 
 
 class GetAllArtistsTask extends Task {
